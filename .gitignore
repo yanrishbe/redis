@@ -1,0 +1,7 @@
+#IDE files and directories
+*.iml
+.idea/
+#Compiled files
+*.exe
+#Excessive files
+project.go
