@@ -27,28 +27,29 @@ func (e customError) Error() string {
 
 var data = make(map[string]string)
 
+//var datafile
 
 func handleConnection(conn net.Conn, commands chan command) {
 
 	defer func() {
 		//conn.Close()
-		err:=conn.Close()
-		if err!=nil{
+		err := conn.Close()
+		if err != nil {
 			log.Fatalln("Error closing a connection")
 		}
-		log.Println("Connection closed")//не fatal потому что оборвутся другие коннекшены
+		log.Println("Connection closed") //не fatal потому что оборвутся другие коннекшены
 	}()
 
 	log.Println("Connection from", conn.RemoteAddr())
 
-	scanner := bufio.NewScanner(conn)//возвращает интерфейс scanner
+	scanner := bufio.NewScanner(conn) //возвращает интерфейс scanner
 
 	for scanner.Scan() { //bufio.scan возвращает булевское значение
-		ln := scanner.Text()//из байтов в текст
-		fs := strings.Fields(ln)// парсит строку, пробелы пропускает
+		ln := scanner.Text()     //из байтов в текст
+		fs := strings.Fields(ln) // парсит строку, пробелы пропускает
 
-		for _,val:= range fs {
-			if match:=strings.EqualFold("stop", val); match{
+		for _, val := range fs {
+			if match := strings.EqualFold("stop", val); match {
 				return
 			}
 		}
@@ -66,7 +67,7 @@ func handleConnection(conn net.Conn, commands chan command) {
 func storage(cmd chan command) {
 
 	for cmd := range cmd {
-		if len(cmd.fields) < 1{
+		if len(cmd.fields) < 1 {
 			cmd.result <- "Please input a command you'd like to execute\n"
 			continue
 		}
@@ -83,22 +84,21 @@ func storage(cmd chan command) {
 
 		fmt.Println("Command:", cmd.fields)
 
-
 		// Executing commands
-		switch strings.ToLower(cmd.fields[0]){
+		switch strings.ToLower(cmd.fields[0]) {
 
 		// GET <KEY>
 		case "get":
-			_,state:=data[cmd.fields[1]]
+			_, state := data[cmd.fields[1]]
 			if !state {
 				cmd.result <- "state:" + " " + "absent"
 			} else {
-				cmd.result <-  "value:" + " " + data[cmd.fields[1]] + "\n" + "state:" + " " + "present"
+				cmd.result <- "value:" + " " + data[cmd.fields[1]] + "\n" + "state:" + " " + "present"
 			}
 
 			// SET <KEY> <VALUE>
 		case "set":
-			match,_:=regexp.MatchString("^[\\w]+$",cmd.fields[1])
+			match, _ := regexp.MatchString("^[\\w]+$", cmd.fields[1])
 			if !match {
 				cmd.result <- "Incorrect key, please, try again"
 				continue
@@ -111,8 +111,8 @@ func storage(cmd chan command) {
 
 			// DEL <KEY>
 		case "del":
-			_, state:=data[cmd.fields[1]]
-			if !state{
+			_, state := data[cmd.fields[1]]
+			if !state {
 				cmd.result <- "state:" + " " + "ignored"
 			} else {
 				delete(data, cmd.fields[1])
@@ -121,22 +121,22 @@ func storage(cmd chan command) {
 
 			// KEYS <PATTERN>
 		case "keys":
-			keys:=make([]string,0)
-			keyString:=""
+			keys := make([]string, 0)
+			keyString := ""
 
-			if strings.Contains(cmd.fields[1],"*"){
-				cmd.fields[1]=strings.TrimRight(cmd.fields[1],"*")
+			if strings.Contains(cmd.fields[1], "*") {
+				cmd.fields[1] = strings.TrimRight(cmd.fields[1], "*")
 
 				for key := range data {
-					if strings.HasPrefix(key,cmd.fields[1]){
-						keys=append(keys, key)
+					if strings.HasPrefix(key, cmd.fields[1]) {
+						keys = append(keys, key)
 					}
 				}
 
 				sort.Strings(keys)
-				result:=strings.Join(keys,", ")
+				result := strings.Join(keys, ", ")
 
-				if len(keys)==0{
+				if len(keys) == 0 {
 					cmd.result <- "There are no keys matching the pattern"
 				} else {
 					cmd.result <- result
@@ -144,13 +144,13 @@ func storage(cmd chan command) {
 
 			} else {
 
-				for key := range data{
-					if key == cmd.fields[1]{
-						keyString +=key
+				for key := range data {
+					if key == cmd.fields[1] {
+						keyString += key
 					}
 				}
 
-				if len(keyString)==0{
+				if len(keyString) == 0 {
 					cmd.result <- "There are no keys matching the pattern"
 				} else {
 					cmd.result <- keyString
@@ -166,30 +166,30 @@ func storage(cmd chan command) {
 func main() {
 	////////////////////////////////////HANDLING FLAGS//////////////////////////////////////////////////////////////////
 	var (
-		port string
-		mode string
+		port        string
+		mode        string
 		defaultPort = "9090"
 		defaultMode = "RAM"
-		usagePort = "the flag is used to choose on which port the server should listen to connections"
-		usageMode = "the flag is used to choose where to store the data the server is going to process"
+		usagePort   = "the flag is used to choose on which port the server should listen to connections"
+		usageMode   = "the flag is used to choose where to store the data the server is going to process"
 	)
 
 	flag.StringVar(&port, "port", defaultPort, usagePort)
 	flag.StringVar(&port, "p", defaultPort, "shorthand for --port")
 	flag.StringVar(&mode, "mode", defaultMode, usageMode)
-	flag.StringVar(&mode, "m", defaultMode,"shorthand for --mode")
+	flag.StringVar(&mode, "m", defaultMode, "shorthand for --mode")
 	flag.Parse()
 
-	match,err:=regexp.MatchString("^[\\d]+$",port)
-	if !match || err!=nil {
-		log.Fatalln(func ()error {
+	match, err := regexp.MatchString("^[\\d]+$", port)
+	if !match || err != nil {
+		log.Fatalln(func() error {
 			return customError{"Incorrect port info"}
 		}())
 	}
 
-	port=":"+port
+	port = ":" + port
 	//////////////////////////////LISTENING AND ACCEPTING CONNECTIONS///////////////////////////////////////////////////
-	li, err := net.Listen("tcp", port)//set up a server and return Listener interface
+	li, err := net.Listen("tcp", port) //set up a server and return Listener interface
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -209,6 +209,6 @@ func main() {
 		if err != nil {
 			log.Printf("Error accepting connection %+#v", err)
 		}
-		go handleConnection(conn, commands)//start a new goroutine each time it has to serve a TCP client
+		go handleConnection(conn, commands) //start a new goroutine each time it has to serve a TCP client
 	}
 }
