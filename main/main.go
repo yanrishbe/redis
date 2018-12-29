@@ -27,7 +27,7 @@ func (e customError) Error() string {
 
 var data = make(map[string]string)
 
-//var datafile
+//var datafile = "/tmp/dataFile.gob"
 
 func handleConnection(conn net.Conn, commands chan command) {
 
@@ -37,16 +37,16 @@ func handleConnection(conn net.Conn, commands chan command) {
 		if err != nil {
 			log.Fatalln("Error closing a connection")
 		}
-		log.Println("Connection closed") //не fatal потому что оборвутся другие коннекшены
+		log.Println("Connection closed")
 	}()
 
 	log.Println("Connection from", conn.RemoteAddr())
 
-	scanner := bufio.NewScanner(conn) //возвращает интерфейс scanner
+	scanner := bufio.NewScanner(conn) //returns scanner interface
 
-	for scanner.Scan() { //bufio.scan возвращает булевское значение
-		ln := scanner.Text()     //из байтов в текст
-		fs := strings.Fields(ln) // парсит строку, пробелы пропускает
+	for scanner.Scan() { //bufio.scan returns bool value
+		ln := scanner.Text()
+		fs := strings.Fields(ln)
 
 		for _, val := range fs {
 			if match := strings.EqualFold("stop", val); match {
@@ -189,7 +189,7 @@ func main() {
 
 	port = ":" + port
 	//////////////////////////////LISTENING AND ACCEPTING CONNECTIONS///////////////////////////////////////////////////
-	li, err := net.Listen("tcp", port) //set up a server and return Listener interface
+	li, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatalln(err)
 	}
