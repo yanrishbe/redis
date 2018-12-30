@@ -17,6 +17,11 @@ type command struct {
 	result chan string
 }
 
+type jsonKeyValue struct {
+	key string
+	value string
+}
+
 type customError struct {
 	custError string
 }
@@ -32,7 +37,6 @@ var data = make(map[string]string)
 func handleConnection(conn net.Conn, commands chan command) {
 
 	defer func() {
-		//conn.Close()
 		err := conn.Close()
 		if err != nil {
 			log.Fatalln("Error closing a connection")
@@ -96,7 +100,7 @@ func storage(cmd chan command) {
 				cmd.result <- "value:" + " " + data[cmd.fields[1]] + "\n" + "state:" + " " + "present"
 			}
 
-			// SET <KEY> <VALUE>
+		// SET <KEY> <VALUE>
 		case "set":
 			match, _ := regexp.MatchString("^[\\w]+$", cmd.fields[1])
 			if !match {
@@ -106,10 +110,13 @@ func storage(cmd chan command) {
 				cmd.result <- "Expected value"
 				continue
 			}
+			//Js:= jsonKeyValue{cmd.fields[1], cmd.fields[2]}
+			//js1,_:=json.Marshal(Js)
+			//fmt.Println(string(js1))
 			data[cmd.fields[1]] = cmd.fields[2]
 			cmd.result <- ""
 
-			// DEL <KEY>
+		// DEL <KEY>
 		case "del":
 			_, state := data[cmd.fields[1]]
 			if !state {
@@ -119,7 +126,7 @@ func storage(cmd chan command) {
 				cmd.result <- "state:" + " " + "absent"
 			}
 
-			// KEYS <PATTERN>
+		// KEYS <PATTERN>
 		case "keys":
 			keys := make([]string, 0)
 			keyString := ""
@@ -180,7 +187,8 @@ func main() {
 	flag.StringVar(&mode, "m", defaultMode, "shorthand for --mode")
 	flag.Parse()
 
-	match, err := regexp.MatchString("^[\\d]+$", port)
+	pattern:="^(6553[0-5]|655[0-2]\\d|65[0-4](\\d){2}|6[0-4](\\d){3}|[1-5](\\d){4}|[1-9](\\d){0,3})$"
+	match, err := regexp.MatchString(pattern, port)
 	if !match || err != nil {
 		log.Fatalln(func() error {
 			return customError{"Incorrect port info"}
@@ -198,9 +206,6 @@ func main() {
 	log.Printf("Server is running on %s\n", port)
 	log.Println("Ready to accept connections")
 
-	//The return value of net.Listen() is of the net.Conn type, which implements the io.Reader and io.Writer interfaces
-	//net.Listen for telling a program to accept net.connections + act as a server
-
 	commands := make(chan command)
 	go storage(commands)
 
@@ -209,6 +214,6 @@ func main() {
 		if err != nil {
 			log.Printf("Error accepting connection %+#v", err)
 		}
-		go handleConnection(conn, commands) //start a new goroutine each time it has to serve a TCP client
+		go handleConnection(conn, commands)
 	}
 }
