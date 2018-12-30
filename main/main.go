@@ -41,7 +41,7 @@ func handleConnection(conn net.Conn, commands chan command) {
 		if err != nil {
 			log.Fatalln("Error closing a connection")
 		}
-		log.Println("Connection closed")
+		log.Println("Connection is closed")
 	}()
 
 	log.Println("Connection from", conn.RemoteAddr())
@@ -95,9 +95,9 @@ func storage(cmd chan command) {
 		case "get":
 			_, state := data[cmd.fields[1]]
 			if !state {
-				cmd.result <- "state:" + " " + "absent"
+				cmd.result <- "state: absent"
 			} else {
-				cmd.result <- "value:" + " " + data[cmd.fields[1]] + "\n" + "state:" + " " + "present"
+				cmd.result <- "value: " + data[cmd.fields[1]] + "; state: present"
 			}
 
 		// SET <KEY> <VALUE>
@@ -114,16 +114,16 @@ func storage(cmd chan command) {
 			//js1,_:=json.Marshal(Js)
 			//fmt.Println(string(js1))
 			data[cmd.fields[1]] = cmd.fields[2]
-			cmd.result <- ""
+			cmd.result <- "Including key and value in database..."
 
 		// DEL <KEY>
 		case "del":
 			_, state := data[cmd.fields[1]]
 			if !state {
-				cmd.result <- "state:" + " " + "ignored"
+				cmd.result <- "state: ignored"
 			} else {
 				delete(data, cmd.fields[1])
-				cmd.result <- "state:" + " " + "absent"
+				cmd.result <- "state: absent"
 			}
 
 		// KEYS <PATTERN>
