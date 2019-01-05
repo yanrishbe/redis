@@ -80,7 +80,7 @@ func main() {
 			fmt.Println("---")
 			// send to server
 			//_, errWrite := fmt.Fprintf(conn, text+"\n")///////?????which better????/////////////////////////////////
-			_, errWrite := conn.Write([]byte(text+"\n"))
+			_, errWrite := conn.Write([]byte(text + "\n"))
 			if errWrite != nil {
 				log.Fatalln("The server is offline, try to reconnect")
 			}
