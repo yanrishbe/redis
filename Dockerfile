@@ -2,7 +2,7 @@ FROM golang:1.11.1-alpine
 
 WORKDIR /go/src/redis/main
 
-COPY *.go /go/src/redis/main
+COPY ./main/ /go/src/redis/main
 
 RUN apk update \
 && apk upgrade \
@@ -13,5 +13,3 @@ RUN go get -u github.com/golang/lint/golint \
 
 RUN mv /go/bin/* /usr/local/go/bin/
 
-RUN go build *.go \
-&& rm -rf *.go

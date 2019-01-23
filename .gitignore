@@ -5,3 +5,5 @@
 *.exe
 #Excessive files
 project.go
+#Trials
+docker-compose.yml
