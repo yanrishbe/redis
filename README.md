@@ -17,6 +17,6 @@ The project can be executed with the help of [Makefile](./Makefile) and Docker c
  |:---|:---|
  |`set`|Updates one key at a time with the given value|.
  |`get`|Returns tuple of the value and the key state. The state either present or absent.|
- |`del`|Removes one key at a time and returns the state of the resource. The state either ignored or absent. A key isignored if it does not exist.|
+ |`del`|Removes one key at a time and returns the state of the resource. The state either ignored or absent. A key is ignored if it does not exist.|
  |`keys`|Returns all keys matching pattern. Pattern could include \* symbol which matches zero or more characters.|
  |`stop`| To stop the client.|
