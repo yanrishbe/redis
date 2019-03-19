@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"github.com/yanrishbe/redis/main/client/flagsClient"
 	"github.com/yanrishbe/redis/main/client/getData"
 	"github.com/yanrishbe/redis/main/client/readData"
@@ -21,17 +20,14 @@ func main() {
 		usageHost   = "the flag is used to choose the host to connect to the server"
 	)
 
-	flagsClient.InitFlags(port, defaultPort, host, defaultHost, usagePort, usageHost)
-	//flagsClient.ValidFlags(port, host)
-	matchHost, errHost := flagsClient.ValidFlags(port, host)
-	//////////////////////////////////////////////////////////
-	if !matchHost || errHost != nil {
-		log.Fatalln(func() error {
-			return errors.New("incorrect hort info")
-		}())
-	}
-	///////////////trials/////////////////////////////////////
+	flagsClient.InitFlags(&port, defaultPort, &host, defaultHost, usagePort, usageHost)
+	matchHost, errHost := flagsClient.ValidHost(host)
+	errPort := flagsClient.ValidPort(port)
 	addr := host + ":" + strconv.Itoa(port)
+
+	if errPort != nil || !matchHost || errHost != nil {
+		log.Fatalln("incorrect host info")
+	}
 
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {

@@ -12,20 +12,18 @@ type testpair struct {
 }
 
 var testvalues = []testpair {
-//{65555, "127.0.0.1:"},
-{0,"127.0.0.1:"},
-{9090,"127.0.0.1:"},git 
+{65555, "127.0.0.1"},
+{0,"172.17.0.1"},
+{-2,"17.0.0.1"},
 }
 
 func TestFlags(t *testing.T) {
+	//assert := assert.New(t)
 	for _,value := range testvalues{
-		assert.Equal(t, flagsClient.ValidFlags(value.port, value.host), {true, !=nil})
-		//if boolVal, errVal:= flagsClient.ValidFlags(value.port, value.host); !boolVal || errVal != nil{
-		//	t.Error(
-		//		"For", value,
-		//		"expected","correct port and host",
-		//		"got", value.port, value.host,
-		//	)
-		//}
+		boolHost, errHost:= flagsClient.ValidHost(value.host)
+		errPort := flagsClient.ValidPort(value.port)
+		assert.Error(t, errPort, "Port error")
+		assert.NoError(t, errHost)
+		assert.Equal(t,boolHost, true )
 	}
 }
