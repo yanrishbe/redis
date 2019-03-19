@@ -34,6 +34,9 @@ func TestFlags(t *testing.T) {
 }
  func TestOutputToClient(t *testing.T){
  	file, _ := os.Create("test.txt")
+ 	defer func(){
+ 	file.Close()
+	}()
 	 conn, _ := net.Dial("tcp", "127.0.0.1:9090")
 	 fmt.Fprintf(conn, "set a asf\n")
 	 assert.NotEmpty(t, getData.OutputToClient(conn, file))

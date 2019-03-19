@@ -12,7 +12,10 @@ import (
 func OutputToClient(conn net.Conn, out io.Writer) io.Writer {
 	scannerConn := bufio.NewScanner(conn)
 	for scannerConn.Scan() {
-		out.Write([]byte("The server sends: " + scannerConn.Text()))
+		_, errWrite :=out.Write([]byte("The server sends: " + scannerConn.Text()))
+		if errWrite != nil {
+			log.Println("Writing to file error")
+		}
 		log.Println("The server sends: " + scannerConn.Text())
 		break
 	}
