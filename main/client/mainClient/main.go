@@ -6,6 +6,7 @@ import (
 	"github.com/yanrishbe/redis/main/client/readData"
 	"log"
 	"net"
+	"os"
 	"strconv"
 )
 
@@ -43,7 +44,7 @@ func main() {
 	}()
 
 	for {
-		scannerStdin := readData.InputClient(conn)
-		getData.OutputToClient(conn, scannerStdin)
+		readData.InputClient(conn)
+		getData.OutputToClient(conn, &os.File{})
 	}
 }

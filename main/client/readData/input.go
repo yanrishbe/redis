@@ -9,12 +9,16 @@ import (
 	"strings"
 )
 
-func InputClient(conn net.Conn) *bufio.Scanner{
+func InputClient(conn net.Conn) {
 
 	scannerStdin := bufio.NewScanner(os.Stdin)
 	fmt.Print("Command to send: ")
 	for scannerStdin.Scan() {
 		text := scannerStdin.Text()
+		if errReadConn := scannerStdin.Err(); errReadConn != nil {
+			log.Printf("Reading error: %T %+v", errReadConn, errReadConn)
+			os.Exit(1)
+		}
 		if match := strings.EqualFold("stop", text); match {
 			log.Println("Disconnecting from the server...")
 			os.Exit(1)
@@ -28,5 +32,4 @@ func InputClient(conn net.Conn) *bufio.Scanner{
 		log.Println("The server receives: " + text)
 		break
 	}
-	return scannerStdin
 }
