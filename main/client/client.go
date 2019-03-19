@@ -1,4 +1,4 @@
-package main
+package client
 
 import (
 	"bufio"
@@ -10,14 +10,6 @@ import (
 	"regexp"
 	"strings"
 )
-
-type customClientError struct {
-	custClientError string
-}
-
-func (e customClientError) Error() string {
-	return fmt.Sprintf("%v", e.custClientError)
-}
 
 func main() {
 
@@ -39,16 +31,12 @@ func main() {
 	patternPort := "^(6553[0-5]|655[0-2]\\d|65[0-4](\\d){2}|6[0-4](\\d){3}|[1-5](\\d){4}|[1-9](\\d){0,3})$"
 	matchPort, errPort := regexp.MatchString(patternPort, port)
 	if !matchPort || errPort != nil {
-		log.Fatalln(func() error {
-			return customClientError{"Incorrect port info"}
-		}())
+		log.Fatalln("Incorrect port info")
 	}
 	patternHost := "^((\\d|[1-9]\\d|1(\\d){2}|2[0-4]\\d|25[0-5])\\.){3}(\\d|[1-9]\\d|1[(\\d){2}|2[0-4]\\d|25[0-5])$"
 	matchHost, errHost := regexp.MatchString(patternHost, host)
 	if !matchHost || errHost != nil {
-		log.Fatalln(func() error {
-			return customClientError{"Incorrect host info"}
-		}())
+		log.Fatalln("Incorrect host info")
 	}
 
 	port = ":" + port
@@ -79,8 +67,8 @@ func main() {
 			}
 			fmt.Println("---")
 			// send to server
-			//_, errWrite := fmt.Fprintf(conn, text+"\n")///////?????which better????/////////////////////////////////
-			_, errWrite := conn.Write([]byte(text + "\n"))
+			_, errWrite := fmt.Fprintf(conn, text+"\n")
+			//_, errWrite := conn.Write([]byte(text + "\n"))
 			if errWrite != nil {
 				log.Fatalln("The server is offline, try to reconnect")
 			}
