@@ -23,6 +23,7 @@ func main() {
 
 	flagsClient.InitFlags(&port, defaultPort, &host, defaultHost, usagePort, usageHost)
 	matchHost, errHost := flagsClient.ValidHost(host)
+
 	errPort := flagsClient.ValidPort(port)
 	addr := host + ":" + strconv.Itoa(port)
 

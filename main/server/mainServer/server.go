@@ -1,45 +1,46 @@
 package main
 
 import (
-	"flag"
-	"github.com/yanrishbe/redis/main/server"
 	"github.com/yanrishbe/redis/main/server/entities"
+	"github.com/yanrishbe/redis/main/server/flagsServer"
 	"github.com/yanrishbe/redis/main/server/readWriteData"
 	"log"
 	"net"
-	"regexp"
+	"strconv"
 )
 
 func main() {
 	////////////////////////////////////HANDLING FLAGS//////////////////////////////////////////////////////////////////
 	var (
-		port        string
+		port        int
 		mode        string
-		defaultPort = "9090"
+		defaultPort = 9090
 		defaultMode = "RAM"
 		usagePort   = "the flag is used to choose on which port the server should listen to connections"
 		usageMode   = "the flag is used to choose where to store the data the server is going to process"
 	)
 
-	flag.StringVar(&port, "port", defaultPort, usagePort)
-	flag.StringVar(&port, "p", defaultPort, "shorthand for --port")
-	flag.StringVar(&mode, "mode", defaultMode, usageMode)
-	flag.StringVar(&mode, "m", defaultMode, "shorthand for --mode")
-	flag.Parse()
+	flagsServer.InitFlags(&port, defaultPort, &mode, defaultMode, usagePort, usageMode)
 
-	pattern := "^(6553[0-5]|655[0-2]\\d|65[0-4](\\d){2}|6[0-4](\\d){3}|[1-5](\\d){4}|[1-9](\\d){0,3})$"
-	match, err := regexp.MatchString(pattern, port)
-	if !match || err != nil {
-		log.Fatalln("Incorrect port info")
+	errPort := flagsServer.ValidPort(port)
+	addr := ":" + strconv.Itoa(port)
+
+	if errPort != nil {
+		log.Fatalln("incorrect host info")
 	}
 
-	port = ":" + port
 	//////////////////////////////LISTENING AND ACCEPTING CONNECTIONS///////////////////////////////////////////////////
-	li, err := net.Listen("tcp", port)
+	li, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	defer li.Close()
+
+	defer func(){
+		err:=li.Close()
+		if err!= nil {
+			panic(err)
+		}
+	}()
 
 	log.Printf("Server is running on %s\n", port)
 	log.Println("Ready to accept connections")
@@ -52,6 +53,6 @@ func main() {
 		if err != nil {
 			log.Printf("Error accepting connection %+#v", err)
 		}
-		go server.HandleConnection(conn, commands)
+		go readWriteData.HandleConnection(conn, commands)
 	}
 }

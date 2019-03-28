@@ -1,4 +1,4 @@
-package server
+package readWriteData
 
 import (
 	"bufio"
@@ -21,9 +21,9 @@ func HandleConnection(conn net.Conn, commands chan entities.Command) {
 
 	log.Println("Connection from", conn.RemoteAddr())
 
-	scanner := bufio.NewScanner(conn) //returns scanner interface
+	scanner := bufio.NewScanner(conn)
 
-	for scanner.Scan() { //bufio.scan returns bool value
+	for scanner.Scan() {
 		ln := scanner.Text()
 		fs := strings.Fields(ln)
 
@@ -39,6 +39,10 @@ func HandleConnection(conn net.Conn, commands chan entities.Command) {
 			Result: result,
 		}
 
-		io.WriteString(conn, <-result+"\n")
+		_, err := io.WriteString(conn, <-result+"\n")
+		if err != nil {
+			log.Println("Error writing data")
+			return
+		}
 	}
 }

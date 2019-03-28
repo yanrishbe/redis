@@ -24,7 +24,7 @@ func InputClient(conn net.Conn) {
 			os.Exit(1)
 		}
 		fmt.Println("---")
-		// send to server
+
 		_, errWrite := fmt.Fprintf(conn, text+"\n")
 		if errWrite != nil {
 			log.Fatalln("The server is offline, try to reconnect")
